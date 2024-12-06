@@ -14,6 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -41,7 +42,7 @@ class AppPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
             ])
             ->registration()
             ->passwordReset()
@@ -133,6 +134,19 @@ class AppPanelProvider extends PanelProvider
             TenantSet::class,
             SwitchTeam::class,
         );
+
+        Filament::serving(function () {
+            Filament::registerNavigationGroups([
+                NavigationGroup::make()
+                    ->label('System Management')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->collapsed(),
+                NavigationGroup::make()
+                     ->label('Settings')
+                     ->icon('heroicon-o-cog-6-tooth')
+                     ->collapsed(),
+            ]);
+        });
     }
 
     public function shouldRegisterMenuItem(): bool

@@ -4,10 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
-//use App\Models\Role;
+use App\Models\City;
+use App\Models\State;
 use App\Models\User;
-use Closure;
-use DeepCopy\Matcher\PropertyTypeMatcher;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,19 +17,14 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Get;
-//use Illuminate\Container\Attributes\DB;
-use Illuminate\Support\Facades\DB as FacadesDB;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\DB;
-
-
+use Filament\Forms\Set;
+use Illuminate\Support\Collection;
 
 class UserResource extends Resource
 {
         protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {
@@ -54,12 +48,12 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('password')
                             ->password()
                             ->required()
+                            ->hiddenOn('edit')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('dni')
                             ->maxLength(255)
                             ->default(null), 
-                        Forms\Components\TextInput::make('birthdate')
-                            ->maxLength(255)
+                        Forms\Components\DatePicker::make('birthdate')
                             ->default(null),
                         Forms\Components\Select::make( 'roles')
                             ->relationship('roles', 'name')
@@ -74,12 +68,6 @@ class UserResource extends Resource
                             ->onColor('success')
                             ->offColor('danger'),
                     ]),
-/*
-                    $table->unsignedBigInteger('country_id');
-                    $table->unsignedBigInteger('state_id');
-                    $table->unsignedBigInteger('city_id');
-                    $table->string('bank_account');
-*/
 
                     Section::make('Address Info')
                     ->columns(3)
@@ -92,38 +80,46 @@ class UserResource extends Resource
                             ->default(null),
                         Forms\Components\TextInput::make('phone')
                             ->maxLength(255)
-                            ->default(null),
-                            /*
+                            ->default(null),      
                         Forms\Components\Select::make('country_id')
                             ->relationship(name : 'country', titleAttribute:'name')
                             ->default(205)
                             ->selectablePlaceholder(false)
-                            ->preload(),
-                            //->searchable()
-                            //->live(),
+                            ->preload()
+                            ->searchable()
+                            ->live()
+                            ->afterStateUpdated(function(Set $set){
+                                $set('state_id', null);
+                                $set('city_id', null);
+                            }),
                         Forms\Components\Select::make('state_id')
-                            //->relationship(name : 'state', titleAttribute:'name')
+                            ->options(fn (Get $get): Collection => State::query()
+                                ->where('country_id', $get('country_id'))
+                                ->pluck('name','id'))
                             ->default(31)
                             ->selectablePlaceholder(false)
-                            ->preload(),
-                            //->searchable()
-                            //->live(),
+                            ->preload()
+                            ->searchable()
+                            ->live()
+                            ->afterStateUpdated(function(Set $set){
+                                $set('city_id', null);
+                            }),
                         Forms\Components\Select::make('city_id')
-                            //->relationship(name : 'city', titleAttribute:'name')
+                            ->options(fn (Get $get): Collection => City::query()
+                                ->where('state_id', $get('state_id'))
+                                ->pluck('name','id'))
                             ->default(4815)
                             ->selectablePlaceholder(false)
-                            ->preload(),
-                            //->searchable()
-                            //->live(),
-                            */
+                            ->preload()
+                            ->searchable(),
                     ]),
 
                     Section::make('Bank details')
                     //->columns(3)
                     ->schema([
-                        Forms\Components\TextInput::make('bank_account')
-                            ->maxLength(255)
-                            ->default(null),
+                            Forms\Components\TextInput::make('bank_account')
+                                ->maxLength(255)
+                                ->default(null),
                         
                     ]),
             ]);
@@ -133,12 +129,42 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('surname')
-                    ->searchable(),
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('active')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('phone')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('address')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false), 
+                Tables\Columns\TextColumn::make('city.name')//nombre de la relación del modelo + . + campo a visualizar
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('dni')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\ToggleColumn::make('active')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false)  
+                    ->onIcon('heroicon-m-user')
+                    ->offIcon('heroicon-m-user')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->disabled(),
+
             ])
             ->filters([
                 //

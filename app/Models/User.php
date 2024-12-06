@@ -37,6 +37,15 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'surname',
         'active',
         'password',
+        'dni',
+        'phone',
+        'birthdate',
+        'address',
+        'postal_code',
+        'country_id',
+        'state_id',
+        'city_id',
+        'bank_account',
     ];
 
     /**
@@ -78,4 +87,20 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return true;
     }
 
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+    
+   /* public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+    */
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
 }
+
