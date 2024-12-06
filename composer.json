@@ -7,12 +7,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bezhansalleh/filament-shield": "^3.3",
         "filament/filament": "^3.2",
         "laravel/framework": "^11.31",
         "laravel/jetstream": "^4.2|^5.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.0",
+        "proyectopy/spaindatabasecities": "^1.0",
         "stephenjude/filament-jetstream": "^0.0.15"
     },
     "require-dev": {
