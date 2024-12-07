@@ -6,6 +6,7 @@ use App\Filament\Resources\StateResource\Pages;
 use App\Filament\Resources\StateResource\RelationManagers;
 use App\Models\State;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -25,10 +26,20 @@ class StateResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                ->required()
-                ->maxLength(255),
-            ]);
+                    Section::make()
+                        ->columns(3)
+                        ->schema([
+                        Forms\Components\Select::make('country_id')
+                            ->relationship(name : 'country', titleAttribute:'name')
+                            ->selectablePlaceholder(false)
+                            //->searchable()
+                            ->preload()
+                            ->live(),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
+                ]);
     }
 
     public static function table(Table $table): Table
@@ -36,9 +47,13 @@ class StateResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                ->searchable(),
-            Tables\Columns\TextColumn::make('country_id')
-                ->searchable(),
+                ->sortable()    
+                ->searchable()
+                ->toggleable(isToggledHiddenByDefault: false),
+            Tables\Columns\TextColumn::make('country.name')
+                ->sortable()    
+                ->searchable()
+                ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
                 //

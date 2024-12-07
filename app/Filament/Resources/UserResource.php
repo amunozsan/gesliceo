@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\City;
+use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
 use Filament\Forms;
@@ -16,9 +17,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\Collection;
+use Filament\Tables\Columns\TagsColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
+use Filament\Shield\Contracts\HasRoles;
+
+
+
 
 class UserResource extends Resource
 {
@@ -26,6 +37,18 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
+
+    public function fields(): array
+{
+    return [
+        TextInput::make('roles')
+            ->label('Roles')
+            ->disabled()
+            ->value(function (User $record) {
+                return $record->roles->pluck('name')->implode(', ');
+            }),
+    ];
+}
     public static function form(Form $form): Form
     {
         return $form
@@ -113,15 +136,40 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable(),
                     ]),
-
                     Section::make('Bank details')
                     //->columns(3)
                     ->schema([
                             Forms\Components\TextInput::make('bank_account')
                                 ->maxLength(255)
                                 ->default(null),
+                            Forms\Components\Select::make('typeuser')
+                                ->options([
+                                    'athlete' => 'Athlete',
+                                    'coach' => 'Coach',
+                                    'coordinator' => 'Coordinator',
+                                ])
+                                ->default(null),
                         
                     ]),
+
+                    Tabs::make('Tabs')
+                    ->tabs([
+                        Tabs\Tab::make('Athlete')
+                        ->hidden(fn (Get $get): bool => $get('roles.role_id') == '3')
+                            ->schema([
+                                
+                                Forms\Components\Select::make( 'roles')
+                                    ->relationship('roles', 'name')
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable()
+                                    ->live(), 
+                            ]),
+                        Tabs\Tab::make('Coach')
+                            ->schema([
+                                // ...
+                            ])
+                    ])
             ]);
     }
     public static function table(Table $table): Table
@@ -152,6 +200,11 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('roles.name')//nombre de la relación del modelo + . + campo a visualizar   
+                    ->badge()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),                    
                 Tables\Columns\TextColumn::make('dni')
                     ->sortable()
                     ->searchable()
@@ -167,7 +220,10 @@ class UserResource extends Resource
 
             ])
             ->filters([
-                //
+                SelectFilter::make('roles')
+                    ->relationship('roles', 'name')
+                    ->searchable()
+                    ->preload()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -178,7 +234,6 @@ class UserResource extends Resource
                 ]),
             ]);
     }
-
     public static function getRelations(): array
     {
         return [

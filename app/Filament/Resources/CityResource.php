@@ -12,6 +12,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 //use Filament\Notifications\Collection;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -35,24 +36,15 @@ class CityResource extends Resource
                 Section::make()
                     ->columns(3)
                     ->schema([
-                     
-                        Forms\Components\Select::make('city.state.country.name')
-                            ->label('Country')
-                            ->options(Country::all()->pluck('name', 'id'))
-                            ->selectableplaceholder(false)
-                            ->preload()
-                            ->live(),
-                        Forms\Components\Select::make('state_id')
+                            
+                            Forms\Components\Select::make('state_id')
                             ->relationship(name : 'state', titleAttribute:'name')
-                            ->default(31)
-                            ->selectablePlaceholder(false)
-                            //->searchable()
                             ->preload()
+                            ->searchable()
                             ->live(),
                         Forms\Components\TextInput::make('name')
                             ->maxLength(255)
                             ->default(null),    
-                        
                         ]),
                     ]);
     }
