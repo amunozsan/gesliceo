@@ -5,13 +5,21 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CityResource\Pages;
 use App\Filament\Resources\CityResource\RelationManagers;
 use App\Models\City;
+use App\Models\Country;
+use App\Models\State;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+//use Filament\Notifications\Collection;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 
 class CityResource extends Resource
 {
@@ -24,18 +32,42 @@ class CityResource extends Resource
     {
         return $form
             ->schema([
-                //
-            ]);
+                Section::make()
+                    ->columns(3)
+                    ->schema([
+                     
+                        Forms\Components\Select::make('city.state.country.name')
+                            ->label('Country')
+                            ->options(Country::all()->pluck('name', 'id'))
+                            ->selectableplaceholder(false)
+                            ->preload()
+                            ->live(),
+                        Forms\Components\Select::make('state_id')
+                            ->relationship(name : 'state', titleAttribute:'name')
+                            ->default(31)
+                            ->selectablePlaceholder(false)
+                            //->searchable()
+                            ->preload()
+                            ->live(),
+                        Forms\Components\TextInput::make('name')
+                            ->maxLength(255)
+                            ->default(null),    
+                        
+                        ]),
+                    ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                 Tables\Columns\TextColumn::make('state_id')
-                    ->searchable(),
+                    ->sortable()    
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                 Tables\Columns\TextColumn::make('state.name')
+                    ->sortable()    
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
                 //
