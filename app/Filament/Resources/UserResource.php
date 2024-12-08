@@ -25,11 +25,13 @@ use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Split;
 use Filament\Forms\Components\TextInput;
 use Filament\Shield\Contracts\HasRoles;
-
-
-
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class UserResource extends Resource
 {
@@ -37,27 +39,13 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-
-    public function fields(): array
-{
-    return [
-        TextInput::make('roles')
-            ->label('Roles')
-            ->disabled()
-            ->value(function (User $record) {
-                return $record->roles->pluck('name')->implode(', ');
-            }),
-    ];
-}
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-
                 Section::make('Personal Info')
                     ->columns(3)
                     ->schema([
-                        
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
@@ -78,18 +66,6 @@ class UserResource extends Resource
                             ->default(null), 
                         Forms\Components\DatePicker::make('birthdate')
                             ->default(null),
-                        Forms\Components\Select::make( 'roles')
-                            ->relationship('roles', 'name')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->live(),  
-                        Forms\Components\Toggle::make('active')
-                            ->default(true)    
-                            ->onIcon('heroicon-m-user')
-                            ->offIcon('heroicon-m-user')
-                            ->onColor('success')
-                            ->offColor('danger'),
                     ]),
 
                     Section::make('Address Info')
@@ -136,40 +112,81 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable(),
                     ]),
-                    Section::make('Bank details')
-                    //->columns(3)
-                    ->schema([
-                            Forms\Components\TextInput::make('bank_account')
-                                ->maxLength(255)
-                                ->default(null),
-                            Forms\Components\Select::make('typeuser')
-                                ->options([
-                                    'athlete' => 'Athlete',
-                                    'coach' => 'Coach',
-                                    'coordinator' => 'Coordinator',
-                                ])
-                                ->default(null),
-                        
-                    ]),
-
-                    Tabs::make('Tabs')
-                    ->tabs([
-                        Tabs\Tab::make('Athlete')
-                        ->hidden(fn (Get $get): bool => $get('roles.role_id') == '3')
+                   
+                    Section::make()
+                        //->columns(3)
+                        ->schema([
+                        Split::make([
+                            Section::make('Bank Info')
+                            //->columns(3)
                             ->schema([
-                                
+                                    Forms\Components\TextInput::make('bank_account')
+                                        ->maxLength(255)
+                                        ->default(null),                       
+                            ]),
+
+                            Section::make('User status')
+                            ->columns(2)
+                            ->schema([
                                 Forms\Components\Select::make( 'roles')
                                     ->relationship('roles', 'name')
                                     ->multiple()
                                     ->preload()
                                     ->searchable()
-                                    ->live(), 
+                                    ->live(),  
+                                Forms\Components\Toggle::make('active')
+                                    ->default(true)    
+                                    ->onIcon('heroicon-m-user')
+                                    ->offIcon('heroicon-m-user')
+                                    ->onColor('success')
+                                    ->offColor('danger'),                      
                             ]),
-                        Tabs\Tab::make('Coach')
-                            ->schema([
-                                // ...
-                            ])
-                    ])
+                        ])
+                    ]),
+
+                    Section::make('User Info')
+                    ->hiddenOn('create')
+                    ->schema([
+                        Tabs::make('athlete')
+                        ->hiddenOn('create')
+                        ->hidden(fn (User $record): bool => !$record->hasRole(roles: 'athlete'))
+                        ->tabs([
+                            Tabs\Tab::make('Athlete 1') 
+                                ->schema([
+                                    Forms\Components\Select::make( 'roles')
+                                        ->relationship('roles', 'name')
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->live(), 
+                                ]),
+                            Tabs\Tab::make('Athlete 2') 
+                                ->schema([
+                                    // ...
+                                ])
+                        ]),
+
+                        Tabs::make('coach')
+                        ->hiddenOn('create')
+                        ->hidden(fn (User $record): bool => !$record->hasRole(roles: 'coach'))
+                        ->tabs([
+                            Tabs\Tab::make('Coach 1') 
+                                ->schema([
+                                    Forms\Components\Select::make( 'roles')
+                                        ->relationship('roles', 'name')
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->live(), 
+                                ]),
+                            Tabs\Tab::make('Coach 2') 
+                                ->schema([
+                                    // ...
+                                ])
+                        ])
+
+                    ]),
+
             ]);
     }
     public static function table(Table $table): Table
@@ -200,7 +217,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('roles.name')//nombre de la relación del modelo + . + campo a visualizar   
+                Tables\Columns\TextColumn::make('roles.name') 
                     ->badge()
                     ->sortable()
                     ->searchable()
@@ -209,25 +226,30 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\ToggleColumn::make('active')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false)  
-                    ->onIcon('heroicon-m-user')
-                    ->offIcon('heroicon-m-user')
-                    ->onColor('success')
-                    ->offColor('danger')
-                    ->disabled(),
-
+                Tables\Columns\IconColumn::make('active')
+                        ->boolean(),
             ])
+
             ->filters([
+                TernaryFilter::make('active')
+                    ->placeholder('All')
+                    ->trueLabel('Active')
+                    ->falseLabel('Inactive')
+                    ->default(true)
+                    ->queries(
+                        true: fn (Builder $query) => $query->where ('active', true),
+                        false: fn (Builder $query) => $query->where('active', false),
+                        blank: fn (Builder $query) => $query,),
                 SelectFilter::make('roles')
                     ->relationship('roles', 'name')
                     ->searchable()
-                    ->preload()
+                    ->preload(),
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

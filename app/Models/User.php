@@ -35,8 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     protected $fillable = [
         'name',
         'surname',
-        'active',
-        'password',
+        'email',
         'dni',
         'phone',
         'birthdate',
@@ -46,6 +45,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'state_id',
         'city_id',
         'bank_account',
+        'profile_photo_path',
+        'active',
+        'password',
+  
     ];
 
     /**
