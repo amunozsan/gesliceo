@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\City;
+use App\Models\Course;
+use App\Models\Letter;
 use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
@@ -32,6 +34,7 @@ use Filament\Shield\Contracts\HasRoles;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use phpDocumentor\Reflection\Types\Boolean;
+use Filament\Forms\Components\Component;
 
 class UserResource extends Resource
 {
@@ -153,12 +156,14 @@ class UserResource extends Resource
                         ->tabs([
                             Tabs\Tab::make('Athlete 1') 
                                 ->schema([
-                                    Forms\Components\Select::make( 'roles')
-                                        ->relationship('roles', 'name')
-                                        ->multiple()
-                                        ->preload()
-                                        ->searchable()
-                                        ->live(), 
+                                    Forms\Components\Select::make('courses')
+                                        ->relationship('courses', 'name')
+                                        ->options(function (callable $get) {
+                                            return Course::whereHas('season', function ($query) {
+                                                $query->where('active', true);
+                                            })->pluck('name', 'id');
+                                        })
+                                        ->getOptionLabelFromRecordUsing(fn (Course $record) => "{$record->name} {$record->letter->value}")                                    
                                 ]),
                             Tabs\Tab::make('Athlete 2') 
                                 ->schema([
