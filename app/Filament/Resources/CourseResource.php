@@ -68,14 +68,19 @@ class CourseResource extends Resource
                 SelectFilter::make('season')    
                 ->relationship('season', 'name')
                     ->preload()
-                    ->default('active' == true)
+                    ->options(function () {
+                        return Season::where('active', true)->pluck('name', 'id');
+                    })
+                    ->default(function () {
+                        return Season::where('active', true)->first()->id;
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

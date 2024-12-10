@@ -146,25 +146,28 @@ class UserResource extends Resource
                             ]),
                         ])
                     ]),
-
+                    
                     Section::make('User Info')
-                    ->hiddenOn('create')
-                    ->schema([
-                        Tabs::make('athlete')
                         ->hiddenOn('create')
-                        ->hidden(fn (User $record): bool => !$record->hasRole(roles: 'athlete'))
-                        ->tabs([
-                            Tabs\Tab::make('Athlete 1') 
-                                ->schema([
-                                    Forms\Components\Select::make('courses')
-                                        ->relationship('courses', 'name')
-                                        ->options(function (callable $get) {
-                                            return Course::whereHas('season', function ($query) {
-                                                $query->where('active', true);
-                                            })->pluck('name', 'id');
-                                        })
-                                        ->getOptionLabelFromRecordUsing(fn (Course $record) => "{$record->name} {$record->letter->value}")                                    
-                                ]),
+                        ->schema([
+                            Tabs::make('athlete')
+                            ->hiddenOn('create')
+                            ->hidden(fn (User $record): bool => !$record->hasRole(roles: 'athlete'))
+                            ->tabs([
+                                Tabs\Tab::make('Athlete 1') 
+                                    ->schema([
+                                        Forms\Components\Select::make('courses')
+                                            ->relationship('courses', 'name')
+                                            ->options(function () {
+                                                return Course::whereHas('season', function ($query) {
+                                                    $query->where('active', true);
+                                                })->get()
+                                                ->pluck('name_and_letter', 'id');
+                                            })
+                                            ->pivotData([
+                                                'active' => true,
+                                            ])
+                                    ]),
                             Tabs\Tab::make('Athlete 2') 
                                 ->schema([
                                     // ...

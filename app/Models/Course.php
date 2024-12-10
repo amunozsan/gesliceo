@@ -13,7 +13,7 @@ class Course extends Model
     protected $fillable = [
         'name',
         'season_id',
-        'letter'
+        'letter',
     ];
 
     protected $casts = [
@@ -29,6 +29,11 @@ class Course extends Model
     {
         return $this->belongsTo(Season::class);
     }
+
+    public function getNameAndLetterAttribute()
+{
+    return $this->name . ' ' . $this->letter->value;
+}
 }
 
 
