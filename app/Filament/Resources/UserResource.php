@@ -12,6 +12,8 @@ use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Concerns\CanBeHidden;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -37,6 +39,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use phpDocumentor\Reflection\Types\Boolean;
 use Filament\Forms\Components\Component;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Support\Facades\DB;
 
 class UserResource extends Resource
 {
@@ -160,6 +163,21 @@ class UserResource extends Resource
                                     ->schema([
                                         Forms\Components\Select::make('courses')
                                             ->relationship('courses', 'name')
+                                            ->createOptionForm([
+                                                Forms\Components\Select::make('courses')
+                                                    ->multiple()
+                                                    ->relationship('courses', 'name')
+                                                    //->options(function () {
+                                                      //  return Course::whereHas('season', function ($query) {
+                                                        //    $query->where('active', true);
+                                                        //})->get()
+                                                        //->pluck('name_and_letter', 'id');
+                                                        //name_and_letter
+                                                    //})
+                                                    //->pivotData([
+                                                      //  'active' => true,
+                                                    //]),
+                                            ])
                                             ->options(function () {
                                                 return Course::whereHas('season', function ($query) {
                                                     $query->where('active', true);
@@ -168,7 +186,7 @@ class UserResource extends Resource
                                             })
                                             ->pivotData([
                                                 'active' => true,
-                                            ])
+                                            ]),
                                     ]),
                             Tabs\Tab::make('Athlete 2') 
                                 ->schema([
@@ -270,9 +288,11 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            CoursesRelationManager::class,
+            CoursesRelationManager::class
         ];
     }
+
+    
 
     public static function getPages(): array
     {

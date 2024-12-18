@@ -109,8 +109,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 
     public function courses(): BelongsToMany
     {
-        return $this->belongsToMany(Course::class)->withPivot('active');
+        return $this->belongsToMany(Course::class)->withPivot('active')->withTimestamps();
     }
+
+
 
 }
 
