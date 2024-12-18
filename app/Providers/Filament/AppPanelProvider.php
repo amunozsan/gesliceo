@@ -49,7 +49,7 @@ class AppPanelProvider extends PanelProvider
             ->emailVerification()
             ->viteTheme('resources/css/app.css')
             ->colors([
-                'primary' => Color::Gray,
+                'primary' => Color::Orange,
             ])
             ->userMenuItems([
                 MenuItem::make()

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Resources\UserResource\RelationManagers\CoursesRelationManager;
 use App\Models\City;
 use App\Models\Course;
 use App\Models\Letter;
@@ -35,6 +36,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use phpDocumentor\Reflection\Types\Boolean;
 use Filament\Forms\Components\Component;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class UserResource extends Resource
 {
@@ -264,10 +266,11 @@ class UserResource extends Resource
                 ]),
             ]);
     }
+  
     public static function getRelations(): array
     {
         return [
-            //
+            CoursesRelationManager::class,
         ];
     }
 
