@@ -15,7 +15,7 @@
 
 		<!-- Header -->
 			<header id="header">
-				<h1>C.D. Liceo Monjardin</h1>
+				<h1>C.D. Liceo Monjardín</h1>
 				<p>¡Estamos construyendo un nuevo hogar digital para nuestro club!</p>
 			</header>
 
