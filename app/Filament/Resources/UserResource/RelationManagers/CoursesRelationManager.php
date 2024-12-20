@@ -18,6 +18,8 @@ class CoursesRelationManager extends RelationManager
 {
     protected static string $relationship = 'courses';
 
+    protected static ?string $title = 'Historical courses';
+
     public function form(Form $form): Form
     {
         return $form
@@ -38,32 +40,32 @@ class CoursesRelationManager extends RelationManager
             //])
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                ->sortable()
-                ->searchable()
-                ->toggleable(isToggledHiddenByDefault: false),
+                ->sortable(),
+                //->searchable()
+                //->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('letter')
-                ->sortable()
-                ->searchable()
-                ->toggleable(isToggledHiddenByDefault: false),
+                ->sortable(),
+                //->searchable()
+                //->toggleable(isToggledHiddenByDefault: false),
                     Tables\Columns\TextColumn::make('season.name')//nombre de la relación del modelo + . + campo a visualizar
                     ->sortable()
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    //->searchable()
+                    //->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                //Tables\Actions\CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                //Tables\Actions\EditAction::make(),
                 //Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                //Tables\Actions\BulkActionGroup::make([
                     //Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //]),
             ]);
     }
 public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool

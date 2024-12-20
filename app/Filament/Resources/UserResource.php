@@ -167,16 +167,16 @@ class UserResource extends Resource
                                                 Forms\Components\Select::make('courses')
                                                     ->multiple()
                                                     ->relationship('courses', 'name')
-                                                    //->options(function () {
-                                                      //  return Course::whereHas('season', function ($query) {
-                                                        //    $query->where('active', true);
-                                                        //})->get()
-                                                        //->pluck('name_and_letter', 'id');
+                                                    ->options(function () {
+                                                        return Course::whereHas('season', function ($query) {
+                                                            $query->where('active', true);
+                                                        })->get()
+                                                        ->pluck('name_and_letter', 'id');
                                                         //name_and_letter
-                                                    //})
-                                                    //->pivotData([
-                                                      //  'active' => true,
-                                                    //]),
+                                                    })
+                                                    ->pivotData([
+                                                        'active' => true,
+                                                    ]),
                                             ])
                                             ->options(function () {
                                                 return Course::whereHas('season', function ($query) {
